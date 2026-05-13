@@ -97,9 +97,9 @@ export function CommentsSection({ issueId }: CommentsSectionProps) {
   return (
     <div className="space-y-3">
       {/* Header */}
-      <div className="flex items-center gap-1.5">
-        <MessageSquare className="h-3.5 w-3.5 text-muted-foreground" />
-        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+      <div className="flex items-center gap-2">
+        <MessageSquare className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Comments {comments.length > 0 && `· ${comments.length}`}
         </span>
       </div>
@@ -107,18 +107,18 @@ export function CommentsSection({ issueId }: CommentsSectionProps) {
       {/* Loading */}
       {loading && (
         <div className="flex items-center justify-center py-4">
-          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
         </div>
       )}
 
       {/* Error */}
       {!loading && error && (
-        <p className="text-xs text-red-500 text-center py-2">{error}</p>
+        <p className="py-2 text-center text-sm text-red-500">{error}</p>
       )}
 
       {/* Empty state */}
       {!loading && !error && comments.length === 0 && (
-        <p className="text-xs text-muted-foreground text-center py-3">
+        <p className="py-3 text-center text-sm text-muted-foreground">
           No comments yet. Be the first to comment.
         </p>
       )}
@@ -134,25 +134,25 @@ export function CommentsSection({ issueId }: CommentsSectionProps) {
                 <img
                   src={comment.userImage}
                   alt={comment.userName}
-                  className="h-7 w-7 shrink-0 rounded-full object-cover border border-border"
+                  className="h-9 w-9 shrink-0 rounded-full border border-border object-cover"
                 />
               ) : (
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted border border-border">
-                  <User className="h-3.5 w-3.5 text-muted-foreground" />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-muted">
+                  <User className="h-4 w-4 text-muted-foreground" />
                 </div>
               )}
 
               {/* Bubble */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-xs font-semibold text-foreground">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-baseline gap-2">
+                  <span className="text-sm font-semibold text-foreground">
                     {comment.userName}
                   </span>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {formatDistanceToNow(comment.createdAt)}
                   </span>
                 </div>
-                <p className="mt-0.5 text-sm text-foreground leading-snug break-words">
+                <p className="mt-1 break-words text-base leading-relaxed text-foreground">
                   {comment.text}
                 </p>
               </div>
@@ -177,36 +177,35 @@ export function CommentsSection({ issueId }: CommentsSectionProps) {
             placeholder="Write a comment… (Enter to submit)"
             rows={1}
             className={cn(
-              "flex-1 resize-none rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm",
+              "min-h-[44px] max-h-28 flex-1 resize-none overflow-y-auto rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-base",
               "placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/30",
-              "min-h-[38px] max-h-24 overflow-y-auto"
             )}
           />
           <button
             type="submit"
             disabled={!text.trim() || submitting}
             className={cn(
-              "flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-lg",
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg",
               "bg-primary text-primary-foreground transition-opacity",
-              (!text.trim() || submitting) && "opacity-50 cursor-not-allowed"
+              (!text.trim() || submitting) && "cursor-not-allowed opacity-50"
             )}
             title="Post comment"
           >
             {submitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
-              <Send className="h-4 w-4" />
+              <Send className="h-5 w-5" />
             )}
           </button>
         </form>
       ) : (
-        <p className="text-xs text-muted-foreground text-center py-2">
+        <p className="py-2 text-center text-sm text-muted-foreground">
           Sign in to leave a comment.
         </p>
       )}
 
       {submitError && (
-        <p className="text-xs text-red-500">{submitError}</p>
+        <p className="text-sm text-red-500">{submitError}</p>
       )}
     </div>
   );

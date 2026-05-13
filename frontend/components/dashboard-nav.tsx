@@ -8,6 +8,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 import { ProfileBadge } from "@/components/profile-badge";
+import { AccessibilityToolbar } from "@/components/accessibility-toolbar";
 
 const NAV_LINKS = [
   { href: "/feed", label: "Feed", icon: Rss },
@@ -20,41 +21,47 @@ export function DashboardNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/90 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
-        {/* Logo */}
-        <Link href="/" className="text-2xl font-extrabold tracking-tight hover:opacity-80 transition-opacity">
+    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#0d1117] text-white shadow-lg shadow-black/30">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+        <Link
+          href="/feed"
+          className="text-3xl font-extrabold tracking-tight text-white transition-colors hover:text-primary"
+        >
           Civix.
         </Link>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden items-center gap-1 md:flex">
           {NAV_LINKS.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-2 rounded-lg px-4 py-2.5 text-base font-medium transition-all duration-200",
                 pathname === href
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                  : "text-white/75 hover:bg-white/10 hover:text-white"
               )}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className="h-5 w-5" />
               {label}
             </Link>
           ))}
         </nav>
 
-        {/* Right: ProfileBadge + UserButton + mobile toggle */}
         <div className="flex items-center gap-2">
-          <ProfileBadge variant="compact" className="hidden sm:inline-flex" />
+          <AccessibilityToolbar compact surface="dark" />
+          <ProfileBadge variant="compact" tone="dark" className="hidden sm:inline-flex" />
           <UserButton
             afterSignOutUrl="/"
-            appearance={{ elements: { avatarBox: "h-8 w-8" } }}
+            appearance={{
+              elements: {
+                avatarBox: "h-9 w-9 ring-2 ring-white/20",
+              },
+            }}
           />
           <button
-            className="md:hidden rounded-lg p-2 hover:bg-accent transition-colors"
+            type="button"
+            className="rounded-lg p-2 text-white/90 transition-colors hover:bg-white/10 md:hidden"
             onClick={() => setMobileOpen((o) => !o)}
             aria-label="Toggle menu"
           >
@@ -63,22 +70,21 @@ export function DashboardNav() {
         </div>
       </div>
 
-      {/* Mobile nav drawer */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border/40 bg-background px-4 pb-4 pt-2">
+        <div className="border-t border-white/10 bg-[#0d1117] px-4 pb-4 pt-2 md:hidden">
           {NAV_LINKS.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
               href={href}
               onClick={() => setMobileOpen(false)}
               className={cn(
-                "flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
+                "flex items-center gap-2 rounded-lg px-4 py-3 text-base font-medium transition-colors",
                 pathname === href
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
               )}
             >
-              <Icon className="h-4 w-4" />
+              <Icon className="h-5 w-5" />
               {label}
             </Link>
           ))}

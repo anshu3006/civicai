@@ -52,6 +52,14 @@ function severityToScore(severity: string): number | null {
   if (severity === "Low") return 2;
   return null;
 }
+
+const ALLOWED_IMAGE_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+]);
 const impactScopeOptions = ["Individual", "Locality", "Ward", "City-wide"];
 const urgencyOptions = ["Immediate", "Within 24hrs", "Within a Week", "Routine"];
 const estimatedResolutionOptions = [
@@ -216,8 +224,8 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setSubmitError("Please select a valid image file.");
+    if (!ALLOWED_IMAGE_MIME_TYPES.has(file.type)) {
+      setSubmitError("Unsupported image format. Please upload JPEG, PNG, WebP, or GIF.");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
@@ -407,7 +415,8 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
         setWebhookErrorCode(asNullableString(responseData?.webhookError));
       }
 
-      const mlConfidence = Number(responseData?.mlConfidence ?? responseData?.confidence);
+      const rawConfidence = responseData?.mlConfidence ?? responseData?.confidence;
+      const mlConfidence = rawConfidence != null && rawConfidence !== "" ? Number(rawConfidence) : NaN;
 
       if (Number.isFinite(mlConfidence)) {
 
@@ -633,17 +642,18 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
   }
 
   return (
-    <div className="rounded-xl border border-border/60 bg-background shadow-sm">
+    <div className="rounded-2xl border border-border/60 bg-card/90 shadow-md shadow-black/[0.04] ring-1 ring-black/[0.04] backdrop-blur-sm transition-shadow duration-300 hover:shadow-lg hover:shadow-black/[0.06] dark:ring-white/[0.06]">
       {/* Collapsed trigger */}
       {!expanded ? (
         <button
+          type="button"
           onClick={() => setExpanded(true)}
-          className="flex w-full items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-muted/50 rounded-xl"
+          className="group flex w-full items-center gap-3 rounded-2xl px-5 py-4 text-left transition-all hover:bg-muted/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/60 sm:px-6 sm:py-5"
         >
-          <div className="flex-1 rounded-full border border-border bg-muted/50 px-4 py-2.5 text-sm text-muted-foreground">
+          <div className="flex-1 rounded-full border border-border/80 bg-muted/40 px-4 py-3 text-base text-muted-foreground shadow-inner transition-colors group-hover:border-primary/25">
             What issue would you like to report?
           </div>
-          <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:translate-y-0.5" />
         </button>
       ) : stage === "analyzing" ? (
         /* ── Loading / Analyzing state ── */
@@ -655,17 +665,17 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
             <Loader2 className="absolute inset-0 m-auto h-9 w-9 animate-spin text-primary" />
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-semibold">
+            <p className="text-base font-semibold">
               {analysisTimedOut ? "Still waiting for AI…" : "Analysing your issue…"}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-base text-muted-foreground">
               {analysisTimedOut
                 ? "The AI is taking longer than expected. Hang tight or cancel and retry."
                 : "Our AI is classifying and enhancing your report. This may take up to 90 seconds."}
             </p>
             <ProcessingStatusIndicator message={processingStatusMessage} />
             {elapsedSeconds > 0 && (
-              <p className="text-xs tabular-nums text-muted-foreground/70">
+              <p className="text-base tabular-nums text-muted-foreground/70">
                 {elapsedSeconds}s elapsed
               </p>
             )}
@@ -674,7 +684,7 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
           <button
             type="button"
             onClick={handleCancel}
-            className="mt-1 rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+            className="mt-1 rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
           >
             Cancel
           </button>
@@ -684,16 +694,16 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
         <div className="p-5 space-y-4">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
-            <h2 className="text-base font-semibold">Review AI Analysis</h2>
+            <h2 className="text-lg font-semibold sm:text-xl">Review AI Analysis</h2>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             The fields below were filled in by AI. Edit them if needed, then confirm to post.
           </p>
 
           {webhookFailed && (
             <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-700 dark:bg-amber-900/20">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-              <p className="text-xs text-amber-700 dark:text-amber-300">
+              <p className="text-sm text-amber-700 dark:text-amber-300">
                 {webhookErrorCode === "TIMEOUT"
                   ? "AI analysis timed out. Please review and fill in the fields below before posting."
                   : webhookErrorCode === "N8N_NOT_CONFIGURED"
@@ -707,17 +717,17 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
 
           {/* Title (read-only) */}
           <div className="space-y-1">
-            <label className="text-sm font-medium">Title</label>
-            <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+            <label className="text-base font-medium">Title</label>
+            <p className="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-base text-muted-foreground">
               {form.title}
             </p>
           </div>
 
           {/* AI-refined Description (editable) */}
           <div className="space-y-1">
-            <label htmlFor="ai-description" className="text-sm font-medium flex items-center gap-1.5">
+            <label htmlFor="ai-description" className="text-base font-medium flex items-center gap-1.5">
               Description
-              <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">AI refined</span>
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-sm font-medium text-primary">AI refined</span>
             </label>
             <textarea
               id="ai-description"
@@ -725,38 +735,38 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
               value={aiFields.description}
               onChange={handleAiFieldChange}
               rows={4}
-              className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:ring-2 focus:ring-primary/30"
+              className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2.5 text-base outline-none transition-colors focus:ring-2 focus:ring-primary/30"
             />
           </div>
 
           {/* Issue Type */}
           <div className="space-y-1">
-            <label htmlFor="ai-predictedIssueType" className="text-sm font-medium flex items-center gap-1.5">
+            <label htmlFor="ai-predictedIssueType" className="text-base font-medium flex items-center gap-1.5">
               Issue Type
-              <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">AI</span>
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-sm font-medium text-primary">AI</span>
             </label>
             <input
               id="ai-predictedIssueType"
               name="predictedIssueType"
               value={aiFields.predictedIssueType}
               onChange={handleAiFieldChange}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:ring-2 focus:ring-primary/30"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-base outline-none transition-colors focus:ring-2 focus:ring-primary/30"
             />
           </div>
 
           {/* Severity + Priority */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1">
-              <label htmlFor="ai-severity" className="text-sm font-medium flex items-center gap-1.5">
+              <label htmlFor="ai-severity" className="text-base font-medium flex items-center gap-1.5">
                 Severity
-                <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">AI / ML</span>
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-sm font-medium text-primary">AI / ML</span>
               </label>
               <select
                 id="ai-severity"
                 name="severity"
                 value={aiFields.severity}
                 onChange={handleAiFieldChange}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">Select severity…</option>
                 {severityOptions.map((level) => (
@@ -765,15 +775,15 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
                   </option>
                 ))}
               </select>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Confidence: {aiFields.confidence !== "" ? Number(aiFields.confidence).toFixed(2) : "N/A"}
               </p>
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="ai-priorityScore" className="text-sm font-medium flex items-center gap-1.5">
+              <label htmlFor="ai-priorityScore" className="text-base font-medium flex items-center gap-1.5">
                 Priority Score <span className="text-muted-foreground font-normal">(1–100)</span>
-                <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">AI</span>
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-sm font-medium text-primary">AI</span>
               </label>
               <input
                 id="ai-priorityScore"
@@ -783,7 +793,7 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
                 max={100}
                 value={aiFields.priorityScore}
                 onChange={handleAiFieldChange}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-base outline-none transition-colors focus:ring-2 focus:ring-primary/30"
               />
             </div>
           </div>
@@ -791,16 +801,16 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
           {/* Impact + Urgency */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1">
-              <label htmlFor="ai-impactScope" className="text-sm font-medium flex items-center gap-1.5">
+              <label htmlFor="ai-impactScope" className="text-base font-medium flex items-center gap-1.5">
                 Impact Scope
-                <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">AI</span>
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-sm font-medium text-primary">AI</span>
               </label>
               <select
                 id="ai-impactScope"
                 name="impactScope"
                 value={aiFields.impactScope}
                 onChange={handleAiFieldChange}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">Select impact scope…</option>
                 {impactScopeOptions.map((scope) => (
@@ -810,16 +820,16 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="ai-urgency" className="text-sm font-medium flex items-center gap-1.5">
+              <label htmlFor="ai-urgency" className="text-base font-medium flex items-center gap-1.5">
                 Urgency
-                <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">AI</span>
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-sm font-medium text-primary">AI</span>
               </label>
               <select
                 id="ai-urgency"
                 name="urgency"
                 value={aiFields.urgency}
                 onChange={handleAiFieldChange}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">Select urgency…</option>
                 {urgencyOptions.map((urgency) => (
@@ -832,16 +842,16 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
           {/* Department + Estimated Resolution */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1">
-              <label htmlFor="ai-suggestedDepartment" className="text-sm font-medium flex items-center gap-1.5">
+              <label htmlFor="ai-suggestedDepartment" className="text-base font-medium flex items-center gap-1.5">
                 Department
-                <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">AI</span>
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-sm font-medium text-primary">AI</span>
               </label>
               <select
                 id="ai-suggestedDepartment"
                 name="suggestedDepartment"
                 value={aiFields.suggestedDepartment}
                 onChange={handleAiFieldChange}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">Select department…</option>
                 {suggestedDepartments.map((d) => (
@@ -851,16 +861,16 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="ai-estimatedResolution" className="text-sm font-medium flex items-center gap-1.5">
+              <label htmlFor="ai-estimatedResolution" className="text-base font-medium flex items-center gap-1.5">
                 Estimated Resolution
-                <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">AI</span>
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-sm font-medium text-primary">AI</span>
               </label>
               <select
                 id="ai-estimatedResolution"
                 name="estimatedResolution"
                 value={aiFields.estimatedResolution}
                 onChange={handleAiFieldChange}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-base outline-none focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">Select estimated resolution…</option>
                 {estimatedResolutionOptions.map((option) => (
@@ -873,7 +883,7 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
           {/* Uploaded image preview (if any) */}
           {aiFields.imageUrl && (
             <div className="space-y-1">
-              <label className="text-sm font-medium">Uploaded Photo</label>
+              <label className="text-base font-medium">Uploaded Photo</label>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={aiFields.imageUrl}
@@ -884,7 +894,7 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
           )}
 
           {submitError && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+            <p className="rounded-lg bg-red-50 px-3 py-2.5 text-base text-red-600 dark:bg-red-900/20 dark:text-red-400">
               {submitError}
             </p>
           )}
@@ -927,11 +937,11 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
       ) : (
         /* ── Original form ── */
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          <h2 className="text-base font-semibold">Report an Issue</h2>
+          <h2 className="text-lg font-semibold sm:text-xl">Report an Issue</h2>
 
           {/* Title */}
           <div className="space-y-1">
-            <label htmlFor="title" className="text-sm font-medium">
+            <label htmlFor="title" className="text-base font-medium">
               Title <span className="text-red-500">*</span>
             </label>
             <input
@@ -941,26 +951,26 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
               onChange={handleChange}
               placeholder="e.g. Broken streetlight on Main St"
               className={cn(
-                "w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/30",
+                "w-full rounded-lg border bg-background px-3 py-2.5 text-base outline-none transition-colors placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/30",
                 errors.title
                   ? "border-red-400 focus:ring-red-200"
                   : "border-border"
               )}
             />
             {errors.title && (
-              <p className="text-xs text-red-500">{errors.title}</p>
+              <p className="text-sm text-red-500">{errors.title}</p>
             )}
           </div>
 
           {/* Description + STT button */}
           <div className="space-y-1.5">
-            <label htmlFor="description" className="text-sm font-medium">
+            <label htmlFor="description" className="text-base font-medium">
               Description <span className="text-red-500">*</span>
             </label>
 
             {/* STT controls row — language dropdown + mic button */}
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 rounded-lg border border-border bg-muted/30 px-3 py-2">
-              <span className="text-xs text-muted-foreground shrink-0">🎙️ Voice:</span>
+              <span className="text-sm text-muted-foreground shrink-0">🎙️ Voice:</span>
               <SpeechToTextButton
                 onTranscript={handleTranscript}
                 showLanguageSelector
@@ -975,21 +985,21 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
               rows={3}
               placeholder="Describe the issue in detail… or use voice input above 🎙️"
               className={cn(
-                "w-full resize-none rounded-lg border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/30",
+                "w-full resize-none rounded-lg border bg-background px-3 py-2.5 text-base outline-none transition-colors placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/30",
                 errors.description
                   ? "border-red-400 focus:ring-red-200"
                   : "border-border"
               )}
             />
             {errors.description && (
-              <p className="text-xs text-red-500">{errors.description}</p>
+              <p className="text-sm text-red-500">{errors.description}</p>
             )}
           </div>
 
           {/* Location text */}
           <div className="grid grid-cols-1 gap-4">
             <div className="space-y-1">
-              <label htmlFor="location" className="text-sm font-medium">
+              <label htmlFor="location" className="text-base font-medium">
                 Location (text)
               </label>
               <input
@@ -998,7 +1008,7 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
                 value={form.location}
                 onChange={handleChange}
                 placeholder="Street, area, or landmark"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-base outline-none transition-colors placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/30"
               />
             </div>
           </div>
@@ -1010,7 +1020,7 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
                 <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
                 <div className="min-w-0">
                   {geoStatus === "idle" && (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       GPS captured on submit, or&nbsp;
                       <button
                         type="button"
@@ -1022,19 +1032,19 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
                     </p>
                   )}
                   {geoStatus === "loading" && (
-                    <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
                       <Loader2 className="h-3 w-3 animate-spin" />
                       Getting your location…
                     </p>
                   )}
                   {geoStatus === "success" && coords && (
-                    <p className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+                    <p className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400">
                       <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
                       <span className="truncate">GPS captured — {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}</span>
                     </p>
                   )}
                   {(geoStatus === "denied" || geoStatus === "unavailable" || geoStatus === "timeout" || geoStatus === "error") && (
-                    <p className="flex items-center gap-1.5 text-xs text-orange-600 dark:text-orange-400">
+                    <p className="flex items-center gap-1.5 text-sm text-orange-600 dark:text-orange-400">
                       <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                       <span className="line-clamp-2">{geoError}</span>
                     </p>
@@ -1045,7 +1055,7 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
                 <button
                   type="button"
                   onClick={() => requestLocation()}
-                  className="shrink-0 rounded-md border border-border px-2 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="shrink-0 rounded-md border border-border px-2 py-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Retry
                 </button>
@@ -1054,7 +1064,7 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
                 <button
                   type="button"
                   onClick={resetGeo}
-                  className="shrink-0 text-xs text-muted-foreground hover:text-foreground"
+                  className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
                   title="Clear location"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -1071,7 +1081,7 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
 
           {/* Image upload */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">
+            <label className="text-base font-medium">
               Photo <span className="text-red-500">*</span>
             </label>
             {imagePreview ? (
@@ -1095,7 +1105,7 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
                 type="button"
                 onClick={() => fileRef.current?.click()}
                 className={cn(
-                  "flex w-full items-center justify-center gap-2 rounded-lg border border-dashed py-6 text-sm transition-colors hover:bg-muted/50",
+                  "flex w-full items-center justify-center gap-2 rounded-lg border border-dashed py-8 text-base transition-colors hover:bg-muted/50",
                   errors.image
                     ? "border-red-400 text-red-500 hover:border-red-400"
                     : "border-border text-muted-foreground hover:border-primary/40"
@@ -1106,7 +1116,7 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
               </button>
             )}
             {errors.image && (
-              <p className="text-xs text-red-500">{errors.image}</p>
+              <p className="text-sm text-red-500">{errors.image}</p>
             )}
             <input
               ref={fileRef}
@@ -1118,7 +1128,7 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
           </div>
 
           {submitError && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+            <p className="rounded-lg bg-red-50 px-3 py-2.5 text-base text-red-600 dark:bg-red-900/20 dark:text-red-400">
               {submitError}
             </p>
           )}
@@ -1163,7 +1173,7 @@ export function PostIssue({ onSuccess }: PostIssueProps) {
                   <h3 className="text-lg font-semibold">
                     {invalidImageType === 'BLURRY' ? 'Blurry Image Detected' : 'Invalid Image'}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-base text-muted-foreground leading-relaxed">
                     {invalidImageType === 'BLURRY' 
                       ? 'The uploaded image is too blurry, obscured, or of insufficient quality to analyze. Please upload a clearer photo.'
                       : 'The uploaded image does not appear to be related to civic, infrastructure, urban, or public safety issues. Please upload a relevant photo.'}

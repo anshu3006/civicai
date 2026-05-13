@@ -64,19 +64,23 @@ export default function MapPage() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-lg font-semibold">Community Map</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Community Map</h1>
+          <p className="mt-1 text-base text-muted-foreground">
             {issuesWithCoords.length} issue{issuesWithCoords.length !== 1 ? "s" : ""} on the map
           </p>
         </div>
         <button
-          onClick={() => { fetchIssues(); requestLocation(); }}
+          type="button"
+          onClick={() => {
+            fetchIssues();
+            requestLocation();
+          }}
           disabled={loadingIssues}
-          className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg border border-border/80 bg-card px-4 py-2.5 text-base font-medium text-muted-foreground shadow-sm transition-all hover:border-primary/40 hover:text-foreground disabled:opacity-50"
         >
-          <RefreshCw className={cn("h-3.5 w-3.5", loadingIssues && "animate-spin")} />
+          <RefreshCw className={cn("h-4 w-4", loadingIssues && "animate-spin")} />
           Refresh
         </button>
       </div>
@@ -84,7 +88,7 @@ export default function MapPage() {
       {/* Geolocation status bar */}
       {geoStatus !== "idle" && geoStatus !== "success" && (
         <div className={cn(
-          "flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs",
+          "flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm",
           geoStatus === "loading"
             ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400"
             : "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400"
@@ -106,7 +110,7 @@ export default function MapPage() {
         </div>
       )}
       {geoStatus === "success" && coords && (
-        <div className="flex items-center gap-2 rounded-lg bg-green-50 dark:bg-green-900/20 px-4 py-2 text-xs text-green-700 dark:text-green-400">
+        <div className="flex items-center gap-2 rounded-lg bg-green-50 px-4 py-2.5 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-400">
           <MapPin className="h-3.5 w-3.5 shrink-0" />
           Location detected — map centered on your position
         </div>
@@ -117,7 +121,7 @@ export default function MapPage() {
         <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 dark:bg-red-900/10 px-4 py-3 text-sm text-red-600 dark:text-red-400">
           <AlertCircle className="h-4 w-4 shrink-0" />
           {issueError}
-          <button onClick={fetchIssues} className="ml-auto text-xs underline">
+          <button type="button" onClick={fetchIssues} className="ml-auto text-sm underline">
             Retry
           </button>
         </div>
@@ -125,7 +129,7 @@ export default function MapPage() {
 
       {/* No-coordinates notice */}
       {!loadingIssues && !issueError && issues.length > 0 && issuesWithCoords.length === 0 && (
-        <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
+        <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
           <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
           No issues have GPS coordinates yet. Newly submitted issues with location permission will appear here.
         </div>
@@ -147,14 +151,14 @@ export default function MapPage() {
 
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl border border-border bg-background px-5 py-3">
-        <span className="text-xs font-medium text-muted-foreground mr-1">Legend:</span>
+        <span className="mr-1 text-sm font-medium text-muted-foreground">Legend:</span>
         {STATUS_LEGEND.map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1.5">
             <span
               className="h-3 w-3 rounded-full border border-white shadow-sm"
               style={{ background: color }}
             />
-            <span className="text-xs text-muted-foreground">{label}</span>
+            <span className="text-sm text-muted-foreground">{label}</span>
           </div>
         ))}
       </div>

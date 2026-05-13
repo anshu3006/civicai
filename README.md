@@ -1,4 +1,4 @@
-# Micro-Task — Civic Issue Reporting Platform
+ # Micro-Task — Civic Issue Reporting Platform
 
 A full-stack civic platform where residents report local issues and admins triage, manage, and resolve them.
 

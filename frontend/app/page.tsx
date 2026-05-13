@@ -14,20 +14,43 @@ import { RoleRedirect } from "@/components/role-redirect";
 /* ─── Hero ─── */
 function Hero() {
   return (
-    <section className="flex flex-col items-center px-6 pt-20 pb-16 text-center">
-      <h1 className="max-w-2xl text-4xl font-extrabold tracking-tight sm:text-5xl">
-        Civic engagement,
-        <br />
-        Prioritise what matters.
-      </h1>
-      <p className="mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">
-        Spot a broken streetlight? A faded notice? Pick up a quick civic task,
-        verify it in minutes, and make a real difference — no long commitments
-        required.
-      </p>
+    <section className="relative flex flex-col items-center px-6 pt-32 pb-24 text-center overflow-hidden bg-[#0d1117] text-white">
+      {/* Govt Dot Pattern */}
+      <div className="absolute inset-0 z-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background z-0"></div>
+      
+      <div className="z-10 relative">
+        <h1 className="max-w-4xl text-5xl font-black tracking-tight sm:text-6xl text-white">
+          Smart Grievance Management,
+          <br className="hidden sm:block"/>
+          <span className="text-primary">Powered by Community.</span>
+        </h1>
+        <p className="mx-auto mt-6 max-w-2xl text-lg text-white/70">
+          Spot a broken streetlight? A faded notice? Pick up a quick civic task,
+          verify it in minutes, and make a real difference in your district immediately.
+        </p>
 
-      {/* Sign in with Google — triggers Clerk OAuth */}
-      <GoogleSignInButton className="mt-8" />
+        {/* Stats Row */}
+        <div className="mt-12 mb-4 mx-auto max-w-3xl rounded-xl bg-white/5 border border-white/10 p-4 grid grid-cols-3 divide-x divide-white/10 backdrop-blur-md">
+          <div className="flex flex-col items-center">
+            <span className="text-2xl font-bold text-primary">50+</span>
+            <span className="text-xs uppercase tracking-wider text-white/60">Districts</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-2xl font-bold text-primary">12</span>
+            <span className="text-xs uppercase tracking-wider text-white/60">Departments</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-2xl font-bold text-primary">10k+</span>
+            <span className="text-xs uppercase tracking-wider text-white/60">Resolved</span>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <GoogleSignInButton className="h-12 px-8 rounded-full" />
+        </div>
+      </div>
     </section>
   );
 }
@@ -219,9 +242,21 @@ function Footer() {
         <div>
           <h5 className="mb-3 text-sm font-semibold">Company</h5>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><a href="#" className="hover:text-foreground transition">About</a></li>
-            <li><a href="#" className="hover:text-foreground transition">Careers</a></li>
-            <li><a href="#" className="hover:text-foreground transition">Press</a></li>
+            <li>
+              <a href="#features" className="transition hover:text-foreground">
+                About
+              </a>
+            </li>
+            <li>
+              <a href="#how-it-works" className="transition hover:text-foreground">
+                Careers
+              </a>
+            </li>
+            <li>
+              <a href="#contact" className="transition hover:text-foreground">
+                Press
+              </a>
+            </li>
           </ul>
         </div>
 
@@ -230,16 +265,32 @@ function Footer() {
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><a href="#features" className="hover:text-foreground transition">Features</a></li>
             <li><a href="#how-it-works" className="hover:text-foreground transition">How It Works</a></li>
-            <li><a href="#" className="hover:text-foreground transition">Pricing</a></li>
+            <li>
+              <a href="#contact" className="transition hover:text-foreground">
+                Pricing
+              </a>
+            </li>
           </ul>
         </div>
 
         <div>
           <h5 className="mb-3 text-sm font-semibold">Support</h5>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><a href="#" className="hover:text-foreground transition">Help Center</a></li>
-            <li><a href="#" className="hover:text-foreground transition">Contact</a></li>
-            <li><a href="#" className="hover:text-foreground transition">Legal</a></li>
+            <li>
+              <a href="#how-it-works" className="transition hover:text-foreground">
+                Help Center
+              </a>
+            </li>
+            <li>
+              <a href="#contact" className="transition hover:text-foreground">
+                Contact
+              </a>
+            </li>
+            <li>
+              <a href="#contact" className="transition hover:text-foreground">
+                Legal
+              </a>
+            </li>
           </ul>
         </div>
       </div>

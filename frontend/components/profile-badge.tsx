@@ -11,10 +11,16 @@ import {
 interface ProfileBadgeProps {
   /** "compact" — just emoji + name (for navbar) | "full" — card with progress bar */
   variant?: "compact" | "full";
+  /** Dark nav bar (light text) */
+  tone?: "default" | "dark";
   className?: string;
 }
 
-export function ProfileBadge({ variant = "compact", className }: ProfileBadgeProps) {
+export function ProfileBadge({
+  variant = "compact",
+  tone = "default",
+  className,
+}: ProfileBadgeProps) {
   const { profile, loading } = useProfile();
 
   if (loading || !profile) return null;
@@ -28,14 +34,16 @@ export function ProfileBadge({ variant = "compact", className }: ProfileBadgePro
     return (
       <span
         className={cn(
-          "inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2.5 py-0.5 text-xs font-medium",
-          info.color,
+          "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium",
+          tone === "dark"
+            ? "border-white/20 bg-white/10 text-white/95 [&>span:first-child]:drop-shadow-sm"
+            : ["border-border bg-muted/60", info.color],
           className
         )}
         title={`${points} pts — ${designation}`}
       >
         <span>{info.emoji}</span>
-        <span>{designation}</span>
+        <span className={tone === "dark" ? "text-primary" : undefined}>{designation}</span>
       </span>
     );
   }
@@ -58,21 +66,21 @@ export function ProfileBadge({ variant = "compact", className }: ProfileBadgePro
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold truncate">{profile.fullName}</p>
-          <p className={cn("text-xs font-medium", info.color)}>
+          <p className="truncate text-base font-semibold">{profile.fullName}</p>
+          <p className={cn("text-sm font-medium", info.color)}>
             {info.emoji} {designation}
           </p>
         </div>
         <div className="shrink-0 text-right">
-          <p className="text-lg font-bold tabular-nums">{points}</p>
-          <p className="text-[11px] text-muted-foreground">points</p>
+          <p className="text-xl font-bold tabular-nums">{points}</p>
+          <p className="text-xs text-muted-foreground">points</p>
         </div>
       </div>
 
       {/* Progress bar */}
       {nextName && (
         <div className="space-y-1">
-          <div className="flex justify-between text-[11px] text-muted-foreground">
+          <div className="flex justify-between text-xs text-muted-foreground">
             <span>Progress to {nextName}</span>
             <span>{points} / {nextMin}</span>
           </div>
@@ -85,7 +93,7 @@ export function ProfileBadge({ variant = "compact", className }: ProfileBadgePro
         </div>
       )}
       {!nextName && (
-        <p className="text-[11px] text-amber-500 font-medium text-center">
+        <p className="text-center text-xs font-medium text-amber-500">
           🏆 Top designation achieved!
         </p>
       )}

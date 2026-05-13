@@ -130,59 +130,63 @@ export function IssueCard({ issue }: { issue: Issue }) {
   return (
     <article
       className={cn(
-        "group rounded-xl border border-border/60 bg-background shadow-sm transition-shadow hover:shadow-md",
-        shouldHighlight && "border-red-200 bg-red-50/30 dark:border-red-900/40 dark:bg-red-950/20"
+        "group relative min-w-0 overflow-hidden rounded-2xl border border-border/50 bg-card/80 shadow-sm ring-1 ring-black/[0.03] transition-all duration-300",
+        "hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5",
+        "dark:ring-white/[0.06]",
+        shouldHighlight &&
+          "border-red-200/80 bg-red-50/40 dark:border-red-900/50 dark:bg-red-950/25"
       )}
     >
-      <div className="p-5">
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="relative p-5 sm:p-6">
         {/* Reporter row */}
-        <div className="flex items-center gap-2 mb-3">
+        <div className="mb-3 flex items-center gap-2.5">
           {issue.reporterImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={issue.reporterImage}
               alt={reporterName}
-              className="h-7 w-7 rounded-full object-cover border border-border"
+              className="h-9 w-9 rounded-full border border-border object-cover"
             />
           ) : (
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted border border-border">
-              <User className="h-3.5 w-3.5 text-muted-foreground" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-muted">
+              <User className="h-4 w-4 text-muted-foreground" />
             </div>
           )}
-          <span className="text-xs font-medium text-foreground">{reporterName}</span>
-          <span className="text-xs text-muted-foreground">·</span>
-          <span className="text-xs text-muted-foreground">{formatDistanceToNow(issue.createdAt)}</span>
+          <span className="text-sm font-semibold text-foreground">{reporterName}</span>
+          <span className="text-sm text-muted-foreground">·</span>
+          <span className="text-sm text-muted-foreground">{formatDistanceToNow(issue.createdAt)}</span>
         </div>
 
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-semibold leading-snug text-foreground line-clamp-2">
+          <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-foreground sm:text-xl">
             {issue.title}
           </h3>
-          <div className="flex flex-col items-end gap-1 shrink-0">
+          <div className="flex shrink-0 flex-col items-end gap-1.5">
             <span
               className={cn(
-                "rounded-full px-2.5 py-0.5 text-xs font-medium",
+                "rounded-full px-3 py-1 text-sm font-medium",
                 STATUS_STYLES[issue.status]
               )}
             >
               {STATUS_LABELS[issue.status]}
             </span>
             {issue.status === "resolved" && verificationStatus === "pending_verification" && (
-              <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
-                <ShieldAlert className="h-3 w-3" />
+              <span className="flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                <ShieldAlert className="h-3.5 w-3.5" />
                 Yet to be Verified
               </span>
             )}
             {issue.status === "resolved" && verificationStatus === "verified" && (
-              <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-                <ShieldCheck className="h-3 w-3" />
+              <span className="flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                <ShieldCheck className="h-3.5 w-3.5" />
                 Verified Resolution ✅
               </span>
             )}
             <span
               className={cn(
-                "rounded-full px-2.5 py-0.5 text-xs font-medium",
+                "rounded-full px-3 py-1 text-sm font-medium",
                 severityLevel === "Critical" && "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
                 severityLevel === "High" && "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300",
                 severityLevel !== "Critical" &&
@@ -204,14 +208,14 @@ export function IssueCard({ issue }: { issue: Issue }) {
               transition: "max-height 0.3s ease",
             }}
           >
-            <p className="text-sm text-muted-foreground leading-6">
+            <p className="text-base leading-relaxed text-muted-foreground">
               {issue.description}
             </p>
           </div>
           {issue.description.length > 150 && (
             <button
               onClick={() => setDescExpanded((v) => !v)}
-              className="mt-1 text-xs font-medium text-primary hover:underline focus:outline-none"
+              className="mt-1.5 text-sm font-medium text-primary hover:underline focus:outline-none"
             >
               {descExpanded ? "Read less" : "Read more"}
             </button>
@@ -231,7 +235,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
               <img
                 src={issue.imageUrl}
                 alt={issue.title}
-                className="h-48 w-full object-cover transition-transform group-hover:scale-[1.02]"
+                className="h-52 w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
               />
               <ExpandHint />
             </button>
@@ -241,7 +245,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
         {/* Verification proof section (shown when resolved) */}
         {issue.status === "resolved" && issue.verificationImageUrl && (
           <div className="mt-3 rounded-lg border border-border/60 bg-muted/30 p-3 space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Admin Verification Proof
             </p>
             <button
@@ -260,7 +264,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
             </button>
             {verificationStatus === "pending_verification" && (
               <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {verificationUpvoteCount} resident{verificationUpvoteCount !== 1 ? "s" : ""} verified
                 </p>
                 <button
@@ -274,7 +278,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
                       : "Confirm this resolution"
                   }
                   className={cn(
-                    "flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                    "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
                     hasVerified
                       ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 cursor-default"
                       : "bg-primary text-primary-foreground hover:bg-primary/90",
@@ -282,9 +286,9 @@ export function IssueCard({ issue }: { issue: Issue }) {
                   )}
                 >
                   {verifyPending ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <ShieldCheck className="h-3 w-3" />
+                    <ShieldCheck className="h-4 w-4" />
                   )}
                   {hasVerified ? "Verified" : "Verify Resolution"}
                 </button>
@@ -294,10 +298,10 @@ export function IssueCard({ issue }: { issue: Issue }) {
         )}
 
         {/* Meta row */}
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
           {locationLabel && (
-            <span className="flex items-center gap-1">
-              <MapPin className="h-3 w-3" />
+            <span className="flex items-center gap-1.5">
+              <MapPin className="h-4 w-4 shrink-0" />
               {locationLabel}
             </span>
           )}
@@ -307,13 +311,14 @@ export function IssueCard({ issue }: { issue: Issue }) {
             <button
               onClick={() => setShowComments((o) => !o)}
               className={cn(
-                "flex items-center gap-1 rounded-full px-2.5 py-1 font-medium transition-colors",
+                "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200",
+                "hover:ring-1 hover:ring-primary/20",
                 showComments
-                  ? "bg-muted text-foreground"
-                  : "hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+                  ? "bg-primary/15 text-foreground ring-1 ring-primary/30"
+                  : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
               )}
             >
-              <MessageSquare className="h-3 w-3" />
+              <MessageSquare className="h-4 w-4" />
               Comments
             </button>
 
@@ -323,17 +328,18 @@ export function IssueCard({ issue }: { issue: Issue }) {
               disabled={!userId || pending}
               title={userId ? (hasUpvoted ? "Remove upvote" : "Upvote") : "Sign in to upvote"}
               className={cn(
-                "flex items-center gap-1 rounded-full px-2.5 py-1 font-medium transition-colors",
+                "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all duration-200",
+                "active:scale-[0.97] hover:ring-1 hover:ring-primary/25",
                 hasUpvoted
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted hover:bg-primary/10 hover:text-primary",
-                (!userId || pending) && "opacity-60 cursor-not-allowed"
+                  ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                  : "bg-muted hover:bg-primary/12 hover:text-primary",
+                (!userId || pending) && "cursor-not-allowed opacity-60"
               )}
             >
               {pending ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <ChevronUp className="h-3 w-3" />
+                <ChevronUp className="h-4 w-4" />
               )}
               {upvoteCount}
             </button>
@@ -343,7 +349,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
 
       {/* Comments section */}
       {showComments && (
-        <div className="border-t border-border/60 px-5 py-4">
+        <div className="relative border-t border-border/60 bg-muted/20 px-5 py-4 sm:px-6">
           <CommentsSection issueId={issue._id} />
         </div>
       )}
@@ -367,24 +373,4 @@ export function IssueCard({ issue }: { issue: Issue }) {
       )}
     </article>
   );
-}
-
-
-export interface Issue {
-  _id: string;
-  title: string;
-  description: string;
-  location?: string | { lat: number; lng: number };
-  locationText?: string;
-  imageUrl?: string;
-  category?: string;
-  severity?: string;
-  severityScore?: number;
-  confidence?: number;
-  department?: string;
-  status: "reported" | "approved" | "in_progress" | "resolved";
-  upvotes: string[];
-  reportedBy?: string;
-  createdAt: string;
-  coordinates?: { lat: number; lng: number };
 }
